@@ -2,6 +2,9 @@ import requests
 import time
 from datetime import datetime
 from bs4 import BeautifulSoup
+import os
+from threading import Thread
+from flask import Flask
 
 class AltinTakipBot:
     def __init__(self):
@@ -132,5 +135,21 @@ class AltinTakipBot:
             print(f"Bot başlatılırken hata: {e}")
 
 if __name__ == "__main__":
-    bot = AltinTakipBot()
-    bot.baslat() 
+    # Botu ayrı bir thread'de başlat
+    t = Thread(target=lambda: AltinTakipBot().baslat())
+    t.daemon = True
+    t.start()
+
+    # Flask web sunucusunu başlat (Render için)
+    app = Flask(__name__)
+
+    @app.route("/")
+    def home():
+        return "Altın Takip Botu Çalışıyor!"
+
+    @app.route("/health")
+    def health():
+        return "OK"
+
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port) 
